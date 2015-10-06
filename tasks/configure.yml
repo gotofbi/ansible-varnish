@@ -32,7 +32,18 @@
   with_items:
     - etc/default/varnish
     - etc/varnish/default.vcl
-    - etc/varnish/emergency.vcl
   notify: Reload Service | varnish
+  tags:
+    - varnish
+
+- name: Upload Emergency Config Script | varnish
+  template:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    owner: root
+    group: wcadmin
+    mode: 0775
+  with_items:
+    - etc/varnish/varnish.sh
   tags:
     - varnish

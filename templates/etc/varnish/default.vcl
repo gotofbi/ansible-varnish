@@ -11,21 +11,7 @@ import std;
 #   https://www.varnish-cache.org/docs/trunk/reference/vcl.html
 ##
 
-{% for backend in varnish_backend_hosts %}
-backend application_{{ loop.index }} {
-  .host = "{{ backend }}";
-  .port = "{{ varnish_backend_port }}";
-{% if varnish_health_checks_enabled %}
-  .probe = {
-    .url = "{{ varnish_health_check_url }}";
-    .interval = {{ varnish_health_check_interval }};
-    .timeout  = {{ varnish_health_check_timeout }};
-    .window = {{ varnish_health_check_window }};
-    .threshold = {{ varnish_health_check_threshold }};
-  }
-{% endif %}
-}
-{% endfor %}
+include "/etc/varnish/hosts.vcl";
 
 ###
 # vcl_init
@@ -47,7 +33,7 @@ sub vcl_init {
 ###
 # vcl_recv
 #   Called at the beginning of a request, after the complete request has been received and parsed.
-#   Its purpose is to decide whether or not to serve the request, how to do it, and, if applicable, which backend to use. 
+#   Its purpose is to decide whether or not to serve the request, how to do it, and, if applicable, which backend to use.
 #   It is also used to modify the request
 ###
 # The vcl_recv subroutine may terminate with calling return() on one of the following keywords:
@@ -149,7 +135,7 @@ sub vcl_recv {
   ###
   # URI Sanitization
   ###
-  
+
   if (req.url ~ "(\?|&){{ varnish_uri_sanitization_regexp }}=") {
     set req.url = regsuball(req.url, "&{{ varnish_uri_sanitization_regexp }}=([A-z0-9_\-\.%25]+)", "");
     set req.url = regsuball(req.url, "\?{{ varnish_uri_sanitization_regexp }}=([A-z0-9_\-\.%25]+)", "?");
