@@ -32,6 +32,7 @@
   with_items:
     - etc/default/varnish
     - etc/varnish/default.vcl
+    - etc/varnish/hosts.vcl
   notify: Reload Service | varnish
   tags:
     - varnish
